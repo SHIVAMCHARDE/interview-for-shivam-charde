@@ -1,5 +1,3 @@
-// spacex-dashboard/src/pages/Dashboard.jsx
-
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -19,6 +17,8 @@ import {
 } from "../api/spacex";
 import moment from "moment";
 import "antd/dist/reset.css";
+import { FilterOutlined } from '@ant-design/icons';
+
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -120,90 +120,82 @@ const Dashboard = () => {
       });
     }
     setFilteredData(result);
-    setPagination((prev) => ({ ...prev, current: 1 })); // reset to page 1 on filter
+    setPagination((prev) => ({ ...prev, current: 1 }));
   }, [selectedStatus, dateRange, launchData]);
 
   const handleTableChange = (pag) => {
     setPagination(pag);
   };
 
-  const columns = [
-    {
-      title: "No.",
-      dataIndex: "no",
-      align: "center",
-    },
-    {
-      title: "Launched (UTC)",
-      dataIndex: "launchDate",
-      align: "center",
-      render: (date) => moment(date).format("DD MMM YYYY HH:mm"),
-    },
-    {
-      title: "Location",
-      dataIndex: "location",
-      align: "center",
-    },
-    {
-      title: "Mission",
-      dataIndex: "mission",
-      align: "center",
-    },
-    {
-      title: "Orbit",
-      dataIndex: "orbit",
-      align: "center",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      align: "center",
-      render: (status) => (
-        <Tag color={statusColors[status.toLowerCase()]}>{status}</Tag>
-      ),
-    },
-    {
-      title: "Rocket",
-      dataIndex: "rocket",
-      align: "center",
-    },
-  ];
+const columns = [
+  { title: "No.", dataIndex: "no", align: "center", width: 70 },
+  {
+    title: "Launched",
+    dataIndex: "launchDate",
+    align: "center",
+    render: (date) => moment(date).format("DD MMM YYYY HH:mm"),
+    width: 150,
+  },
+  { title: "Location", dataIndex: "location", align: "center", width: 120 },
+  {
+    title: "Mission",
+    dataIndex: "mission",
+    align: "center",
+    width: 120, 
+    ellipsis: true,
+  },
+  { title: "Orbit", dataIndex: "orbit", align: "center", width: 100 },
+  {
+    title: "Status",
+    dataIndex: "status",
+    align: "center",
+    render: (status) => (
+      <Tag color={statusColors[status.toLowerCase()]}>{status}</Tag>
+    ),
+    width: 100,
+  },
+  { title: "Rocket", dataIndex: "rocket", align: "center", width: 120 },
+];
 
   return (
-    <div className="p-4 min-h-screen flex flex-col items-center">
-      <div className="bg-white flex flex-col mb-4 shadow-md w-full justify-center items-center p-2">
+    <div className="p-2 sm:p-3 md:p-4 min-h-screen flex flex-col items-center">
+      <div className="bg-white flex flex-col mb-2 sm:mb-3 md:mb-4 shadow w-full justify-center items-center p-2 sm:p-3">
         <img
           src="/spacex_logo.png"
           alt="SpaceX Logo"
-          className="w-40 md:w-60 mb-2 object-contain"
+          className="w-32 sm:w-40 md:w-60 mb-1 object-contain"
         />
       </div>
 
-      <div className="w-full md:w-[80%] mx-auto mb-4 bg-white p-4 rounded-md">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="w-full md:w-[80%] mx-auto mb-2 sm:mb-3 md:mb-4 bg-white p-2 sm:p-3 rounded-md">
+        <div className="flex flex-col md:flex-row gap-2 sm:gap-3 justify-between items-center">
           <RangePicker
             value={dateRange}
             onChange={(dates) => setDateRange(dates || [])}
             format="DD-MM-YYYY"
-            className="w-full md:w-auto"
+            className="w-full md:w-auto text-xs sm:text-sm"
             ranges={presetRanges}
           />
-          <Select
-            value={selectedStatus}
-            onChange={setSelectedStatus}
-            className="w-full md:w-60"
-          >
-            <Option value="All Launches">All Launches</Option>
-            <Option value="Success">Successful Launches</Option>
-            <Option value="Failed">Failed Launches</Option>
-            <Option value="Upcoming">Upcoming Launches</Option>
-          </Select>
+          <div className="flex items-center w-60 md:w-60">
+  <FilterOutlined className="text-gray-500 text-base" />
+  <Select
+    value={selectedStatus}
+    onChange={setSelectedStatus}
+     bordered={false}
+    className="flex-1 text-xs sm:text-sm"
+  >
+    <Option value="All Launches">All Launches</Option>
+    <Option value="Success">Successful Launches</Option>
+    <Option value="Failed">Failed Launches</Option>
+    <Option value="Upcoming">Upcoming Launches</Option>
+  </Select>
+</div>
         </div>
       </div>
 
-      <div className="w-full md:w-[80%]">
+      <div className="w-full md:w-[80%] overflow-x-auto">
         {loading ? (
-          <div className="flex justify-center p-8">
+          <div className="flex justify-center p-4">
             <Spin size="large" />
           </div>
         ) : (
@@ -215,16 +207,18 @@ const Dashboard = () => {
               current: pagination.current,
               pageSize: pagination.pageSize,
               showSizeChanger: true,
-              pageSizeOptions: ["5", "10", "20", "50", "100"],
+              pageSizeOptions: ["5", "10", "20", "50"],
               total: filteredData.length,
-              // showQuickJumper: true,
             }}
             onChange={handleTableChange}
             scroll={{ x: "max-content" }}
             locale={{
-              emptyText: <Empty description="No results found for the specified filter." />,
+              emptyText: (
+                <Empty description="No results found for the specified filter." />
+              ),
             }}
             bordered
+            size="small"
             onRow={(record) => ({ onClick: () => setModalData(record) })}
           />
         )}
@@ -237,19 +231,23 @@ const Dashboard = () => {
         centered
       >
         {modalData && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
               <img
                 src={
                   modalData.links?.patch?.small ||
                   "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SpaceX_CRS-1_Patch.png/480px-SpaceX_CRS-1_Patch.png"
                 }
                 alt="Mission Patch"
-                className="w-20 h-20 rounded object-contain"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded object-contain"
               />
               <div className="flex flex-col text-center sm:text-left">
-                <h2 className="text-lg font-semibold">{modalData.mission}</h2>
-                <span className="text-sm text-gray-500">{modalData.rocket}</span>
+                <h2 className="text-sm sm:text-base font-semibold">
+                  {modalData.mission}
+                </h2>
+                <span className="text-xs sm:text-sm text-gray-500">
+                  {modalData.rocket}
+                </span>
                 <Tag
                   color={statusColors[modalData.status.toLowerCase()]}
                   className="w-fit mx-auto sm:mx-0 mt-1"
@@ -258,7 +256,7 @@ const Dashboard = () => {
                 </Tag>
               </div>
             </div>
-            <p className="text-sm text-gray-700">
+            <p className="text-xs sm:text-sm text-gray-700">
               {modalData.details || "No mission details available."}
             </p>
             <div className="flex flex-col border rounded-md overflow-hidden">
@@ -268,15 +266,17 @@ const Dashboard = () => {
                 { label: "Rocket", value: modalData.rocket },
                 {
                   label: "Launch Date",
-                  value: moment(modalData.launchDate).format("DD MMM YYYY HH:mm"),
+                  value: moment(modalData.launchDate).format(
+                    "DD MMM YYYY HH:mm"
+                  ),
                 },
                 { label: "Orbit", value: modalData.orbit },
-                { label: "Status", value: modalData.status },
+                { label: "Status", value: modalData.status , style: { font: 'bold' }},
                 { label: "Launch Site", value: modalData.location },
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className={`flex justify-between px-4 py-2 text-sm ${
+                  className={`flex justify-between px-3 py-1 ${
                     idx !== 0 ? "border-t" : ""
                   }`}
                 >
