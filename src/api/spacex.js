@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const spacexAPI = axios.create({
-  baseURL: import.meta.env.VITE_SPACEX_BASE_URL,
+  baseURL: process.env.REACT_APP_SPACEX_BASE_URL || "https://api.spacexdata.com"
+,
   timeout: 10000,
 });
 
