@@ -293,5 +293,4 @@ const columns = [
     </div>
   );
 };
-
 export default Dashboard;
